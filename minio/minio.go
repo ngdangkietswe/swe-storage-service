@@ -40,7 +40,7 @@ func (c *Client) PutObj(ctx context.Context, bucket, object, filePath string) {
 	})
 
 	if err != nil {
-		log.Printf("[MINIO} Failed to put object: %v", err)
+		log.Printf("[MINIO] Failed to put object: %v", err)
 		return
 	}
 
