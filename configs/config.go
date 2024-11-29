@@ -44,4 +44,5 @@ type Configuration struct {
 	MinIOBucketPrivate string `mapstructure:"MINIO_BUCKET_PRIVATE"`
 	MinIOUseSSL        bool   `mapstructure:"MINIO_USE_SSL"`
 	MinIODefaultExpiry int    `mapstructure:"MINIO_DEFAULT_EXPIRY"`
+	JwtSecret          string `mapstructure:"JWT_SECRET"`
 }

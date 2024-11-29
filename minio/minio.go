@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/ngdangkietswe/swe-protobuf-shared/generated/storage"
 	"github.com/ngdangkietswe/swe-storage-service/configs"
 	"log"
 	"net/url"
@@ -33,30 +34,37 @@ func NewMinIO() *Client {
 	}
 }
 
-// PutObj uploads an object to the specified bucket.
-func (c *Client) PutObj(ctx context.Context, bucket, object, filePath string) {
-	data, err := c.minioClient.FPutObject(ctx, bucket, object, filePath, minio.PutObjectOptions{
-		ContentType: "application/octet-stream",
-	})
-
-	if err != nil {
-		log.Printf("[MINIO] Failed to put object: %v", err)
-		return
+// PresignedUrl generates a presigned URL for the specified object.
+// The presigned URL can be used to perform PUT or GET operations on the object.
+func (c *Client) PresignedUrl(ctx context.Context, bucket, objectName string, method storage.PresignedURLMethod, duration int32) (string, error) {
+	if method != storage.PresignedURLMethod_PRESIGNED_URL_METHOD_PUT && method != storage.PresignedURLMethod_PRESIGNED_URL_METHOD_GET {
+		return "", fmt.Errorf("[MINIO] Invalid presigned URL method: %v", method)
 	}
 
-	log.Printf("[MINIO] Successfully uploaded %s of size %d to %s", object, data.Size, bucket)
-}
+	expires := time.Second * time.Duration(configs.GlobalConfig.MinIODefaultExpiry)
+	if duration > 0 {
+		expires = time.Second * time.Duration(duration)
+	}
 
-// PresignedUrl generates a presigned URL for the specified object.
-func (c *Client) PresignedUrl(ctx context.Context, bucket, object string) string {
-	reqParams := make(url.Values)
-	reqParams.Set("response-content-disposition", "attachment; filename=\""+object+"\"")
-	presignedUrl, err := c.minioClient.PresignedGetObject(ctx, bucket, object, time.Second*time.Duration(configs.GlobalConfig.MinIODefaultExpiry), reqParams)
+	var (
+		presignedUrl *url.URL
+		err          error
+	)
+
+	switch method {
+	case storage.PresignedURLMethod_PRESIGNED_URL_METHOD_PUT:
+		presignedUrl, err = c.minioClient.PresignedPutObject(ctx, bucket, objectName, expires)
+	case storage.PresignedURLMethod_PRESIGNED_URL_METHOD_GET:
+		reqParams := url.Values{
+			"response-content-disposition": {fmt.Sprintf("attachment; filename=\"%s\"", objectName)},
+		}
+		presignedUrl, err = c.minioClient.PresignedGetObject(ctx, bucket, objectName, expires, reqParams)
+	}
+
 	if err != nil {
-		log.Printf("[MINIO] Failed to get presigned URL: %v", err)
-		return ""
+		return "", fmt.Errorf("[MINIO] failed to generate presigned URL: %w", err)
 	}
 
 	log.Printf("[MINIO] Successfully generated presigned URL: %s", presignedUrl.String())
-	return presignedUrl.String()
+	return presignedUrl.String(), nil
 }
