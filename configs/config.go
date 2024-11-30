@@ -3,8 +3,6 @@ package configs
 import (
 	"github.com/spf13/viper"
 	"log"
-	"os"
-	"strings"
 )
 
 var (
@@ -15,11 +13,6 @@ func init() {
 	viper.AddConfigPath("./configs")
 	viper.SetConfigName("config")
 	viper.SetConfigType("env")
-
-	env := os.Getenv("ENV")
-	if env != "" {
-		viper.SetConfigName(strings.ToLower(env))
-	}
 
 	viper.AutomaticEnv()
 
