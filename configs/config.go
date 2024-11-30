@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"os"
+	"strings"
 )
 
 var (
@@ -12,9 +13,12 @@ var (
 
 func init() {
 	env := os.Getenv("K8S_ENV")
-	if env == "prod" {
+	log.Printf("K8S_ENV is set to %s", env)
+	if strings.ToLower(env) == "prod" {
+		log.Println("Using production config")
 		viper.AutomaticEnv()
 	} else {
+		log.Println("Using local config")
 		viper.AddConfigPath("./configs")
 		viper.SetConfigName("config")
 		viper.SetConfigType("env")
