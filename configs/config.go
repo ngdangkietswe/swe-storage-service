@@ -3,6 +3,7 @@ package configs
 import (
 	"github.com/spf13/viper"
 	"log"
+	"os"
 )
 
 var (
@@ -10,28 +11,25 @@ var (
 )
 
 func init() {
-	viper.AddConfigPath("./configs")
-	viper.SetConfigName("config")
-	viper.SetConfigType("env")
+	env := os.Getenv("K8S_ENV")
+	if env == "prod" {
+		viper.AutomaticEnv()
+	} else {
+		viper.AddConfigPath("./configs")
+		viper.SetConfigName("config")
+		viper.SetConfigType("env")
 
-	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatalf("Can't read config file: %v", err)
-		return
+		err := viper.ReadInConfig()
+		if err != nil {
+			log.Fatalf("Can't read config file: %v", err)
+			return
+		}
 	}
 
-	config := &Configuration{}
-	err = viper.Unmarshal(config)
+	err := viper.Unmarshal(&GlobalConfig)
 	if err != nil {
 		log.Fatalf("Can't unmarshal config: %v", err)
-		return
 	}
-
-	GlobalConfig = config
-
-	return
 }
 
 type Configuration struct {
