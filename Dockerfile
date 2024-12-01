@@ -31,14 +31,11 @@ FROM alpine:latest
 # Install necessary runtime dependencies
 RUN apk --no-cache add ca-certificates
 
-# Set working directory
-WORKDIR /root/
-
 # Copy the compiled binary from the build stage
-COPY --from=builder /app/app .
+COPY --from=builder app .
 
 # Expose the application port (update as per your app's requirement)
 EXPOSE 7030
 
 # Default command to run the application
-CMD ["./app"]
+CMD ./app
