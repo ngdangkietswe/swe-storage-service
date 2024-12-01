@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
+  build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
 
@@ -22,11 +22,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Extract branch name
+      - name: Extract Branch Name
         id: extract_branch
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
 
       - name: Git Commit Data
+        id: git_commit_data
         uses: rlespinasse/git-commit-data-action@v1.5.0
 
       - name: Log in to Docker Hub
@@ -36,29 +37,36 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Confirm Docker Login
-        run: echo "Successfully logged in to Docker Hub."
+        run: echo "✅ Successfully logged in to Docker Hub."
 
       - name: Build Docker Image
         run: |
-          echo "Building Docker image..."
-          
-          # Extract the branch name and commit hash
+          set -e  # Exit on any error
+          echo "🚀 Starting Docker image build..."
+
+          # Extract details for tagging
           TIMESTAMP=$(TZ=Asia/Ho_Chi_Minh date +"%Y%m%d%H%M%S")
           BRANCH_NAME=${{ steps.extract_branch.outputs.branch }}
-          COMMIT_SHA=${{ env.GIT_COMMIT_SHORT_SHA }}
+          COMMIT_SHA=${{ steps.git_commit_data.outputs.short_sha }}
           IMAGE_TAG="$BRANCH_NAME-$COMMIT_SHA-$TIMESTAMP"
-          
-          echo "Tagging Docker image with $IMAGE_TAG..."
+
+          echo "🔖 Tagging Docker image as $IMAGE_TAG..."
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
           # Build the Docker image
-          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+          docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest .
 
       - name: Confirm Docker Build
-        run: echo "Docker image built successfully with tag ${{ env.IMAGE_TAG }}."
+        run: |
+          echo "✅ Docker image built successfully with tags: ${{ env.IMAGE_TAG }} and latest."
 
       - name: Push Docker Image
         run: |
-          echo "Pushing Docker image to Docker Hub..."
+          set -e  # Exit on any error
+          echo "📤 Pushing Docker images to Docker Hub..."
+
+          # Push both tags
           docker push $IMAGE_NAME:${{ env.IMAGE_TAG }}
-          echo "Docker image pushed successfully to Docker Hub as $IMAGE_NAME:${{ env.IMAGE_TAG }}."
+          docker push $IMAGE_NAME:latest
+
+          echo "✅ Docker images pushed successfully: $IMAGE_NAME:${{ env.IMAGE_TAG }} and $IMAGE_NAME:latest."
