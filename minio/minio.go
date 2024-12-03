@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/ngdangkietswe/swe-go-common-shared/config"
 	"github.com/ngdangkietswe/swe-protobuf-shared/generated/storage"
-	"github.com/ngdangkietswe/swe-storage-service/configs"
 	"log"
 	"net/url"
 	"time"
@@ -16,12 +16,21 @@ type Client struct {
 	minioClient *minio.Client
 }
 
+var (
+	Host          = config.GetString("MINIO_HOST", "localhost")
+	Port          = config.GetInt("MINIO_PORT", 9000)
+	AccessKey     = config.GetString("MINIO_ACCESS_KEY", "")
+	SecretKey     = config.GetString("MINIO_SECRET_KEY", "")
+	UseSSL        = config.GetBool("MINIO_USE_SSL", false)
+	DefaultExpiry = config.GetInt("MINIO_DEFAULT_EXPIRY", 3600)
+)
+
 func NewMinIO() *Client {
 	minioClient, err := minio.New(
-		fmt.Sprintf("%s:%d", configs.GlobalConfig.MinIOHost, configs.GlobalConfig.MinIOPort),
+		fmt.Sprintf("%s:%d", Host, Port),
 		&minio.Options{
-			Creds:  credentials.NewStaticV4(configs.GlobalConfig.MinIOAccessKey, configs.GlobalConfig.MinIOSecretKey, ""),
-			Secure: configs.GlobalConfig.MinIOUseSSL,
+			Creds:  credentials.NewStaticV4(AccessKey, SecretKey, ""),
+			Secure: UseSSL,
 		})
 
 	if err != nil {
@@ -41,7 +50,7 @@ func (c *Client) PresignedUrl(ctx context.Context, bucket, objectName string, me
 		return "", fmt.Errorf("[MINIO] Invalid presigned URL method: %v", method)
 	}
 
-	expires := time.Second * time.Duration(configs.GlobalConfig.MinIODefaultExpiry)
+	expires := time.Second * time.Duration(DefaultExpiry)
 	if duration > 0 {
 		expires = time.Second * time.Duration(duration)
 	}

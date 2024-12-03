@@ -10,3 +10,9 @@ Minio is used as the storage, and Docker for containerization, and GitHub Action
 - [x] [Minio](https://min.io/)
 - [x] [Docker](https://www.docker.com/)
 - [x] [GitHub Actions](https://docs.github.com/en/actions)
+
+## Build
+
+```bash
+  make build
+  ```
