@@ -16,21 +16,17 @@ type Client struct {
 	minioClient *minio.Client
 }
 
-var (
-	Host          = config.GetString("MINIO_HOST", "localhost")
-	Port          = config.GetInt("MINIO_PORT", 9000)
-	AccessKey     = config.GetString("MINIO_ACCESS_KEY", "")
-	SecretKey     = config.GetString("MINIO_SECRET_KEY", "")
-	UseSSL        = config.GetBool("MINIO_USE_SSL", false)
-	DefaultExpiry = config.GetInt("MINIO_DEFAULT_EXPIRY", 3600)
-)
-
 func NewMinIO() *Client {
 	minioClient, err := minio.New(
-		fmt.Sprintf("%s:%d", Host, Port),
+		fmt.Sprintf("%s:%d",
+			config.GetString("MINIO_HOST", "localhost"),
+			config.GetInt("MINIO_PORT", 9000)),
 		&minio.Options{
-			Creds:  credentials.NewStaticV4(AccessKey, SecretKey, ""),
-			Secure: UseSSL,
+			Creds: credentials.NewStaticV4(
+				config.GetString("MINIO_ACCESS_KEY", ""),
+				config.GetString("MINIO_SECRET_KEY", ""),
+				""),
+			Secure: config.GetBool("MINIO_USE_SSL", false),
 		})
 
 	if err != nil {
@@ -50,7 +46,7 @@ func (c *Client) PresignedUrl(ctx context.Context, bucket, objectName string, me
 		return "", fmt.Errorf("[MINIO] Invalid presigned URL method: %v", method)
 	}
 
-	expires := time.Second * time.Duration(DefaultExpiry)
+	expires := time.Second * time.Duration(config.GetInt("MINIO_DEFAULT_EXPIRY", 3600))
 	if duration > 0 {
 		expires = time.Second * time.Duration(duration)
 	}
