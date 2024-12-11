@@ -23,7 +23,7 @@ jobs:
       packages: write
 
     outputs:
-      START_TIME: ${{ steps.build_image.outputs.start_time }}
+      START_TIME: ${{ steps.build_start_time.outputs.start_time }}
       IMAGE_TAG: ${{ steps.build_image.outputs.image_tag }}
       COMMIT_SHA: ${{ steps.build_image.outputs.commit_sha }}
 
