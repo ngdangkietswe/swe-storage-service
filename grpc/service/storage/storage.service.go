@@ -1,4 +1,4 @@
-package storage
+package grpcservicestorage
 
 import (
 	"context"
@@ -25,7 +25,7 @@ func (s storageService) GetPresignedURL(ctx context.Context, req *storage.Presig
 	}, nil
 }
 
-func NewStorageService(minioClient *minio.Client) IStorageService {
+func NewStorageGrpcService(minioClient *minio.Client) IStorageService {
 	return &storageService{
 		minioClient: minioClient,
 	}

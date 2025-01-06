@@ -8,6 +8,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.81
 	github.com/ngdangkietswe/swe-go-common-shared v0.0.0-20241230065349-b45a7662e0d5
 	github.com/ngdangkietswe/swe-protobuf-shared v0.0.0-20241229170805-4dafc661568b
+	go.uber.org/fx v1.23.0
 	google.golang.org/grpc v1.68.0
 )
 
@@ -36,7 +37,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.19.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	go.uber.org/dig v1.18.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/crypto v0.29.0 // indirect
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
 	golang.org/x/net v0.31.0 // indirect

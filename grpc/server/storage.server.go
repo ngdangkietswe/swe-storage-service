@@ -1,4 +1,4 @@
-package storage
+package server
 
 import (
 	"context"
@@ -9,19 +9,19 @@ import (
 	storageservice "github.com/ngdangkietswe/swe-storage-service/grpc/service/storage"
 )
 
-type GrpcServer struct {
+type StorageGrpcServer struct {
 	storage.UnimplementedStorageServiceServer
 	storageService storageservice.IStorageService
 }
 
-func NewGrpcServer(storageService storageservice.IStorageService) *GrpcServer {
-	return &GrpcServer{
+func NewStorageGrpcServer(storageService storageservice.IStorageService) *StorageGrpcServer {
+	return &StorageGrpcServer{
 		storageService: storageService,
 	}
 }
 
 // GetPresignedURL is a function that implements the GetPresignedURL method of the StorageServiceServer interface
-func (s *GrpcServer) GetPresignedURL(ctx context.Context, req *storage.PresignedURLReq) (*storage.PresignedURLResp, error) {
+func (s *StorageGrpcServer) GetPresignedURL(ctx context.Context, req *storage.PresignedURLReq) (*storage.PresignedURLResp, error) {
 	var action string
 	if req.Type == storage.PresignedURLMethod_PRESIGNED_URL_METHOD_GET {
 		action = constants.ActionDownload
